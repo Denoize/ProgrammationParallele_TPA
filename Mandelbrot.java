@@ -19,7 +19,7 @@ public class Mandelbrot {
     // c'est-à-dire du point (-1.5, -1) en bas à gauche au point (0.5, 1) en haut
     // à droite
 
-    final static int max = 20_000; 
+    final static int max = 51_000; 
     // C'est le nombre maximum d'itérations pour déterminer la couleur d'un pixel
     
     public static void main(String[] args)  {
