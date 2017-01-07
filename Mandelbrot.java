@@ -14,15 +14,13 @@ public class Mandelbrot extends Thread{
     final static double xc     = -.5 ;
     final static double yc     = 0 ; // Le point (xc,yc) est le centre de l'image
     final static double region = 2;
-	private int offset;
+	private static Object rendezvous = new Object();
+	private static volatile int ligne_image = 0;
     // La région du plan considérée est un carré de côté égal à 2.
     // Elle s'étend donc du point (xc - 1, yc - 1) au point (xc + 1, yc + 1)
     // c'est-à-dire du point (-1.5, -1) en bas à gauche au point (0.5, 1) en haut
     // à droite
     
-    public Mandelbrot(int offset){
-    	this.offset = offset;
-    }
 
     final static int max = 51_000; 
     // C'est le nombre maximum d'itérations pour déterminer la couleur d'un pixel
@@ -30,11 +28,17 @@ public class Mandelbrot extends Thread{
     public void run(){
     	final long startTime = System.nanoTime();
     	final long endTime;
-    	for (int i = 0; i < taille/4; i++) {
-            for (int j = 0; j < taille; j++) {
-            	colorierPixel(i+offset,j);
-            }
-    	}
+    	int i;
+    	do
+    	{
+    		synchronized (rendezvous) {
+	    		i = ligne_image++;
+			}
+	    	for (int j = 0; j < taille; j++) {
+    			colorierPixel(i,j);
+    		}
+	    }while(ligne_image < taille);
+    	
     	endTime = System.nanoTime();
     	final long duree = (endTime - startTime) / 1_000_000 ;
     	System.out.println("Duree du "+ currentThread().getName() +" = " + (long) duree + " ms.");
@@ -49,7 +53,7 @@ public class Mandelbrot extends Thread{
 	Mandelbrot t[] = new Mandelbrot [4];
 	
 	for (int i = 0; i < 4; i++) {
-		t[i] = new Mandelbrot(i*125);
+		t[i] = new Mandelbrot();
 		t[i].start();
 	}
 	
